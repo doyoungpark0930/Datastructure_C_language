@@ -21,7 +21,7 @@ typedef struct node {
 
 /* for stack */
 #define MAX_STACK_SIZE		20
-Node* stack[MAX_STACK_SIZE];
+Node* stack[MAX_STACK_SIZE]={NULL,};
 int top = -1;
 
 Node* pop();
@@ -29,7 +29,7 @@ void push(Node* aNode);
 
 /* for queue */
 #define MAX_QUEUE_SIZE		20
-Node* queue[MAX_QUEUE_SIZE];
+Node* queue[MAX_QUEUE_SIZE]={NULL,};
 int front = -1;
 int rear = -1;
 
@@ -130,8 +130,6 @@ int initializeBST(Node** h) {
 	(*h)->key = -9999;
 
 	top = -1;
-	memset(queue,NULL,sizeof(queue));  //큐와 스택이 가리키는 값들 모두 초기화
-	memset(stack,NULL,sizeof(stack)); 
 	front = rear = -1;
 
 	return 1;
@@ -160,7 +158,11 @@ void iterativeInorder(Node* node)
 		node=pop();		//스택에서 삭제
 
 		if(!node)//공백 스택이라면
+		{
+			memset(stack,NULL,sizeof(stack)); //끝날떄는 스택 초기화
+			top=-1;
 			break;
+		}
 		printf(" [%d] ",node->key);
 		node=node->right;
 	}
@@ -187,7 +189,8 @@ void levelOrder(Node* ptr) //레벨 순서 트리 순회
 		}
 		else
 		{	
-			
+			memset(queue,NULL,sizeof(queue)); //끝날 떄는 큐 초기화
+			front=rear=-1;
 			break;
 		}
 		
@@ -244,6 +247,102 @@ int insert(Node* head, int key)
 
 int deleteNode(Node* head, int key)
 {
+	Node* ptr=head->left;
+	Node* trail = head; 
+	int returnKey = 0;
+	if (ptr != NULL) //노드가 하나라도 있다면
+	{
+		while (ptr != NULL) {
+			if (key == ptr->key) //key값을 갖고있는 노드를 발견한다면
+				break;
+			trail = ptr;
+			if (key < ptr->key)
+				ptr = ptr->left;
+			else
+				ptr = ptr->right;
+		}
+		if (ptr == NULL) { //ptr이 NULL을 가리킨다는 것은 값을 찾을 수 없다는 뜻
+			printf("Cannot find the value\n");
+			return NULL;
+
+		}
+		if (ptr->left == NULL && ptr->right == NULL) //자식노드가 없다면,즉 leaf노드라면
+		{ 
+			if (trail == head) //트리의 노드가 하나 밖에 없다면
+			{ 
+				trail->left = NULL;
+				returnKey = ptr->key;
+				free(ptr);
+				return returnKey;
+			}
+			if (ptr->key < trail->key) //leafNode의 key가 부모노드의 key보다 작다면 부모노드의 leftChild는 NULL을 가리킨다
+				trail->left = NULL;
+			if (ptr->key > trail->key) //leaftNode의 key가 부모노드의 key보다 크다면 부모노드의 rightChild는 NULL을 가리킨다
+				trail->right = NULL;
+			returnKey = ptr->key;
+			free(ptr);
+			return returnKey;
+		}
+		else if(ptr->left!=NULL&&ptr->right!=NULL) //자식 노드가 두 개 라면
+		{
+			//오른쪽 서브트리에서 가장 작은원소로 대체하는 방식
+			Node* endptr=ptr->right;
+			Node* endptrTrail=ptr;
+			while(endptr->left){ //endptr이 오른쪽 서브트리의 가장 작은 원소를 가리키게 되면 반복문을 빠져나온다
+				endptrTrail=endptr;
+				endptr=endptr->left;
+			}
+
+			if(endptrTrail->key==ptr->key) //오른쪽 서브트리의 최솟값이 서브트리의 첫번째 노드라면
+			{
+				endptr->left=ptr->left;
+			}
+			else
+			{
+				endptrTrail->left=NULL;
+				endptr->left=ptr->left;
+				endptr->right=ptr->right;
+			}
+
+			if (ptr->key < trail->key) //지울 노드의 key가 부모노드의 key보다 작다면
+				trail->left=endptr;
+			else	//지울 노드의 key가 부모노드의 key보다 크다면
+				trail->right=endptr;
+			returnKey = ptr->key;
+			free(ptr);
+			return returnKey;
+
+
+
+		}
+		else //자식 노드가 한 개 라면
+		{
+			
+			if(ptr->left!=NULL) //ptr의 왼쪽 노드에 자식이 있다면
+			{
+				if (ptr->key < trail->key) //삭제할 노드가 부모노드의 왼쪽에 있다면
+				trail->left=ptr->left;
+				else	//삭제할 노드가 부모노드의 오른쪽에 있다면
+				trail->right =ptr->left;
+				returnKey=ptr->key;
+				free(ptr);
+				return returnKey;
+			}
+			else //ptr의 오른쪽 노드에 자식이 있다면
+			{	
+				if (ptr->key < trail->key) //삭제할 노드가 부모노드의 왼쪽에 있다면
+				trail->left=ptr->right;
+				else	//삭제할 노드가 부모노드의 오른쪽에 있다면
+				trail->right =ptr->right;
+				returnKey=ptr->key;
+				free(ptr);
+				return returnKey;
+			}
+		}
+	}
+	else { 
+		printf("There is no Node to delete\n");
+	}
 }
 
 
