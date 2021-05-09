@@ -1,6 +1,7 @@
 /*
  * Binary Search Tree #2
- *
+ * 작성자 :박도영
+ * 작성일자: 2021/05/09
  * Data Structures
  *
  * Department of Computer Science
@@ -20,7 +21,7 @@ typedef struct node {
 
 /* for stack */
 #define MAX_STACK_SIZE		20
-Node* stack[MAX_STACK_SIZE]={NULL,}; //포인터 배열 모두 NULL값으로 초기화
+Node* stack[MAX_STACK_SIZE];
 int top = -1;
 
 Node* pop();
@@ -28,7 +29,7 @@ void push(Node* aNode);
 
 /* for queue */
 #define MAX_QUEUE_SIZE		20
-Node* queue[MAX_QUEUE_SIZE]={NULL,};//포인터 배열 모두 NULL값으로 초기화
+Node* queue[MAX_QUEUE_SIZE];
 int front = -1;
 int rear = -1;
 
@@ -152,6 +153,17 @@ void recursiveInorder(Node* ptr)
  */
 void iterativeInorder(Node* node)
 {
+	for(;;)
+	{
+		for(;node;node=node->left) 
+			push(node);		//스택에 삽입
+		node=pop();		//스택에서 삭제
+
+		if(!node)//공백 스택이라면
+			break;
+		printf(" [%d] ",node->key);
+		node=node->right;
+	}
 }
 
 /**
@@ -175,7 +187,7 @@ void levelOrder(Node* ptr) //레벨 순서 트리 순회
 		}
 		else
 		{	
-			front=-1,rear=-1; //재 실행 대비해서 초기화
+			
 			break;
 		}
 		
@@ -264,11 +276,13 @@ int freeBST(Node* head)
 
 
 Node* pop()
-{
+{//스택에서 pop
+	return stack[top--];
 }
 
 void push(Node* aNode)
-{
+{ //스택에 삽입
+	stack[++top]=aNode;
 }
 
 
